@@ -28,7 +28,7 @@ namespace Memory
                 Font = new Font("Georgia", 20, FontStyle.Bold),
                 ForeColor = Color.FromArgb(255, 105, 180),
                 AutoSize = true,
-                Location = new Point(200, 30)
+                Location = new Point(30, 30)
             };
 
             Label lblContent = new Label
@@ -37,7 +37,7 @@ namespace Memory
                 ForeColor = Color.FromArgb(100, 100, 100),
                 AutoSize = false,
                 Size = new Size(600, 350),
-                Location = new Point(50, 80),
+                Location = new Point(30, 80),
                 TextAlign = ContentAlignment.TopLeft
             };
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 using System.IO;
+using Memory.Data;
 
 namespace Memory
 {
@@ -12,12 +13,21 @@ namespace Memory
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            // Создаём папку для сохранений
+            
             if (!Directory.Exists("Saves"))
                 Directory.CreateDirectory("Saves");
 
-            // Используем Form1 как главную форму (пока что)
+            
+            if (!Directory.Exists("Assets/Sounds"))
+                Directory.CreateDirectory("Assets/Sounds");
+
+            
+            MusicManager.Play();
+
             Application.Run(new Form1());
+
+            
+            MusicManager.Stop();
         }
     }
 }

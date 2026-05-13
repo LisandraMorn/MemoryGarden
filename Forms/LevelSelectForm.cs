@@ -9,12 +9,20 @@ namespace Memory
     {
         private Profile profile;
         private int profileIndex;
-        private TabControl tabControl;
+        private Panel parentPanel;
+        private Form mainForm;
+        private Panel[] tabPanels;
+        private Button[] tabButtons;
+        private int currentTabIndex = 0;
 
-        public LevelSelectForm(Profile prof, int profIndex)
+        private string[] tabNames = { "Ребёнок", "Молодая", "Взрослая" };
+
+        public LevelSelectForm(Profile prof, int profIdx, Panel panel, Form main)
         {
             profile = prof;
-            profileIndex = profIndex;
+            profileIndex = profIdx;
+            parentPanel = panel;
+            mainForm = main;
             InitializeUI();
         }
 
@@ -23,459 +31,217 @@ namespace Memory
             this.Text = "Выбор уровня";
             this.Size = new Size(900, 650);
             this.StartPosition = FormStartPosition.CenterParent;
-            this.BackColor = Color.FromArgb(255, 248, 220);
+            this.BackColor = Color.Black;
 
             Label lblTitle = new Label
             {
-                Text = "🌺 Выбери уровень",
+                Text = "Выбери этап",
                 Font = new Font("Georgia", 24, FontStyle.Bold),
-                ForeColor = Color.FromArgb(255, 105, 180),
+                ForeColor = Color.White,
                 AutoSize = true,
                 Location = new Point(350, 20)
             };
 
-            tabControl = new TabControl
+            Panel tabsPanel = new Panel
             {
-                Size = new Size(800, 500),
+                Size = new Size(800, 40),
                 Location = new Point(50, 70),
-                Font = new Font("Georgia", 12)
+                BackColor = Color.Black
             };
 
-            for (int i = 1; i <= 6; i++)
+            tabButtons = new Button[3];
+            tabPanels = new Panel[3];
+
+            for (int i = 0; i < 3; i++)
             {
-                TabPage tab = new TabPage(GetStars(i));
-                tab.BackColor = Color.FromArgb(255, 248, 220);
-
-                FlowLayoutPanel panel = new FlowLayoutPanel
+                tabButtons[i] = new Button
                 {
-                    Size = new Size(780, 450),
-                    Location = new Point(10, 10),
-                    AutoScroll = true,
-                    FlowDirection = FlowDirection.LeftToRight,
-                    WrapContents = true
+                    Text = tabNames[i],
+                    Size = new Size(266, 40),
+                    Location = new Point(i * 266, 0),
+                    Font = new Font("Georgia", 11, FontStyle.Bold),
+                    BackColor = i == 0 ? Color.FromArgb(60, 60, 60) : Color.Black,
+                    ForeColor = Color.White,
+                    FlatStyle = FlatStyle.Flat
                 };
+                tabButtons[i].FlatAppearance.BorderSize = 2;
+                tabButtons[i].FlatAppearance.BorderColor = Color.White;
+                tabButtons[i].Cursor = Cursors.Hand;
+                int tabIndex = i;
+                tabButtons[i].Click += (s, e) => SwitchTab(tabIndex);
+                tabsPanel.Controls.Add(tabButtons[i]);
 
-                int levelsPerDifficulty = 5;
-                for (int level = 0; level < levelsPerDifficulty; level++)
-                {
-                    int levelId = (i - 1) * levelsPerDifficulty + level;
-                    Button levelBtn = CreateLevelButton(levelId, i);
-                    panel.Controls.Add(levelBtn);
-                }
-
-                tab.Controls.Add(panel);
-                tabControl.TabPages.Add(tab);
+                tabPanels[i] = CreateLevelsPanel(i);
+                tabPanels[i].Visible = (i == 0);
+                tabPanels[i].Location = new Point(50, 120);
             }
+
+            this.Controls.Add(tabsPanel);
+            for (int i = 0; i < 3; i++)
+                this.Controls.Add(tabPanels[i]);
 
             Button btnBack = new Button
             {
                 Text = "← Назад",
                 Font = new Font("Georgia", 12),
-                Size = new Size(120, 40),
+                Size = new Size(180, 40),
                 Location = new Point(50, 580),
-                BackColor = Color.FromArgb(150, 150, 150),
+                BackColor = Color.Black,
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat
             };
             btnBack.FlatAppearance.BorderSize = 2;
-            btnBack.FlatAppearance.BorderColor = Color.FromArgb(100, 100, 100);
+            btnBack.FlatAppearance.BorderColor = Color.White;
             btnBack.Cursor = Cursors.Hand;
-            btnBack.Click += (s, e) => this.Close();
+            btnBack.Click += (s, e) => GoBackToMenu();
 
             this.Controls.Add(lblTitle);
-            this.Controls.Add(tabControl);
             this.Controls.Add(btnBack);
         }
 
-        private string GetStars(int count)
+        private Panel CreateLevelsPanel(int difficulty)
         {
-            return new string('⭐', count);
+            Panel panel = new Panel
+            {
+                Size = new Size(800, 450),
+                BackColor = Color.Black
+            };
+
+            FlowLayoutPanel flowPanel = new FlowLayoutPanel
+            {
+                Size = new Size(800, 450),
+                AutoScroll = true,
+                FlowDirection = FlowDirection.LeftToRight,
+                WrapContents = true,
+                BackColor = Color.Black
+            };
+
+            int levelsPerTab = 3; 
+
+            for (int level = 0; level < levelsPerTab; level++)
+            {
+                int levelId = difficulty * levelsPerTab + level;
+                Button levelBtn = CreateLevelButton(levelId);
+                flowPanel.Controls.Add(levelBtn);
+            }
+
+            panel.Controls.Add(flowPanel);
+            return panel;
         }
 
-        private Button CreateLevelButton(int levelId, int difficulty)
+        private Button CreateLevelButton(int levelId)
         {
-            bool isUnlocked = profile.UnlockedLevels.Contains(levelId);
+            bool isUnlocked = profile.UnlockedLevels.Contains(levelId) || levelId == 0;
             bool isCompleted = profile.CompletedLevels.Contains(levelId);
 
             Button btn = new Button
             {
                 Size = new Size(150, 150),
                 Margin = new Padding(10),
-                BackColor = isCompleted ? Color.FromArgb(144, 238, 144) :
-                           isUnlocked ? Color.FromArgb(255, 182, 193) :
-                           Color.FromArgb(200, 200, 200),
-                ForeColor = isCompleted ? Color.White : Color.FromArgb(100, 100, 100),
+                BackColor = isUnlocked ? Color.Black : Color.FromArgb(30, 30, 30),
+                ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
+                Font = new Font("Georgia", 18, FontStyle.Bold),
+                Text = (levelId % 4 + 1).ToString(),
                 Enabled = isUnlocked,
-                Font = new Font("Georgia", 11, FontStyle.Bold)
+                Cursor = isUnlocked ? Cursors.Hand : Cursors.Default
             };
-
             btn.FlatAppearance.BorderSize = 3;
-            btn.FlatAppearance.BorderColor = isCompleted ? Color.FromArgb(34, 139, 34) :
-                                          isUnlocked ? Color.FromArgb(255, 105, 180) :
-                                          Color.FromArgb(150, 150, 150);
+            btn.FlatAppearance.BorderColor = Color.White;
 
-            if (isUnlocked)
+            if (isCompleted)
             {
-                btn.Text = $"Уровень {levelId + 1}\n\n14×15\n{GetStars(difficulty)}";
-                btn.Click += (s, e) => StartLevel(levelId, difficulty);
-            }
-            else
-            {
-                btn.Text = "🔒\nЗакрыто";
+                btn.BackColor = Color.FromArgb(40, 40, 40);
+                btn.Text += " ✓";
             }
 
-            btn.Cursor = isUnlocked ? Cursors.Hand : Cursors.Default;
-            return btn;
-        }
-
-        private void StartLevel(int levelId, int difficulty)
-        {
-            Puzzle puzzle = CreateTestPuzzle(levelId, difficulty);
-
-            GamePlayForm game = new GamePlayForm(puzzle, profile, profileIndex);
-            game.ShowDialog(this);
-
-            if (game.IsCompleted && !profile.CompletedLevels.Contains(levelId))
+            btn.Click += (s, e) =>
             {
-                profile.CompletedLevels.Add(levelId);
-                if (levelId + 1 < 30)
-                    profile.UnlockedLevels.Add(levelId + 1);
-                profile.Save(profileIndex);
-            }
-        }
-
-        private Puzzle CreateTestPuzzle(int id, int difficulty)
-        {
-            Puzzle puzzle = new Puzzle
-            {
-                ID = id,
-                Width = 14,
-                Height = 15,
-                Difficulty = difficulty,
-                Name = $"Уровень {id + 1}",
-                Colors = new Color[]
+                if (isCompleted)
                 {
-                    Color.White,
-                    Color.FromArgb(70, 130, 180),
-                    Color.FromArgb(220, 20, 60),
-                    Color.FromArgb(60, 179, 113),
-                    Color.FromArgb(255, 215, 0),
-                    Color.FromArgb(148, 0, 211),
-                    Color.FromArgb(255, 140, 0)
-                }
-            };
-
-            for (int y = 0; y < puzzle.Height; y++)
-            {
-                for (int x = 0; x < puzzle.Width; x++)
-                {
-                    puzzle.Solution[y, x] = 0;
-                }
-            }
-
-            puzzle.HintsHorizontal = GenerateHints(puzzle.Solution, puzzle.Height, puzzle.Width, true);
-            puzzle.HintsVertical = GenerateHints(puzzle.Solution, puzzle.Width, puzzle.Height, false);
-
-            return puzzle;
-        }
-
-        private int[,] GenerateHints(int[,] data, int rows, int cols, bool horizontal)
-        {
-            int[,] hints = new int[rows, 10];
-
-            for (int i = 0; i < rows; i++)
-            {
-                int hintIndex = 0;
-                int count = 0;
-                int lastColor = 0;
-
-                for (int j = 0; j < cols; j++)
-                {
-                    int val = horizontal ? data[i, j] : data[j, i];
-
-                    if (val != 0)
+                    string story = GetStoryForLevel(levelId);
+                    if (!string.IsNullOrEmpty(story))
                     {
-                        if (val == lastColor)
-                        {
-                            count++;
-                        }
-                        else
-                        {
-                            if (count > 0)
-                            {
-                                hints[i, hintIndex++] = lastColor * 100 + count;
-                            }
-                            count = 1;
-                            lastColor = val;
-                        }
+                        StoryForm storyForm = new StoryForm(story);
+                        storyForm.ShowDialog(this);
                     }
-                    else
-                    {
-                        if (count > 0)
-                        {
-                            hints[i, hintIndex++] = lastColor * 100 + count;
-                            count = 0;
-                            lastColor = 0;
-                        }
-                    }
-                }
-
-                if (count > 0)
-                {
-                    hints[i, hintIndex++] = lastColor * 100 + count;
-                }
-            }
-
-            return hints;
-        }
-        public class LevelSelectForm : Form
-        {
-            private Profile profile;
-            private int profileIndex;
-            private Panel parentPanel;
-            private Form mainForm;
-            private TabControl tabControl;
-
-            // Новый конструктор для встраивания
-            public LevelSelectForm(Profile prof, int profIndex, Panel panel, Form main)
-            {
-                profile = prof;
-                profileIndex = profIndex;
-                parentPanel = panel;
-                mainForm = main;
-                InitializeUI();
-            }
-
-            // Старый конструктор
-            public LevelSelectForm(Profile prof, int profIndex)
-            {
-                profile = prof;
-                profileIndex = profIndex;
-                InitializeUI();
-            }
-
-            private void InitializeUI()
-            {
-                this.Text = "Выбор уровня";
-                this.Size = new Size(900, 650);
-                this.StartPosition = FormStartPosition.CenterParent;
-                this.BackColor = Color.FromArgb(255, 248, 220);
-
-                Label lblTitle = new Label
-                {
-                    Text = "🌺 Выбери уровень",
-                    Font = new Font("Georgia", 24, FontStyle.Bold),
-                    ForeColor = Color.FromArgb(255, 105, 180),
-                    AutoSize = true,
-                    Location = new Point(350, 20)
-                };
-
-                tabControl = new TabControl
-                {
-                    Size = new Size(800, 500),
-                    Location = new Point(50, 70),
-                    Font = new Font("Georgia", 12)
-                };
-
-                for (int i = 1; i <= 6; i++)
-                {
-                    TabPage tab = new TabPage(GetStars(i));
-                    tab.BackColor = Color.FromArgb(255, 248, 220);
-
-                    FlowLayoutPanel panel = new FlowLayoutPanel
-                    {
-                        Size = new Size(780, 450),
-                        Location = new Point(10, 10),
-                        AutoScroll = true,
-                        FlowDirection = FlowDirection.LeftToRight,
-                        WrapContents = true
-                    };
-
-                    int levelsPerDifficulty = 5;
-                    for (int level = 0; level < levelsPerDifficulty; level++)
-                    {
-                        int levelId = (i - 1) * levelsPerDifficulty + level;
-                        Button levelBtn = CreateLevelButton(levelId, i);
-                        panel.Controls.Add(levelBtn);
-                    }
-
-                    tab.Controls.Add(panel);
-                    tabControl.TabPages.Add(tab);
-                }
-
-                Button btnBack = new Button
-                {
-                    Text = "← В главное меню",
-                    Font = new Font("Georgia", 12),
-                    Size = new Size(180, 40),
-                    Location = new Point(50, 580),
-                    BackColor = Color.FromArgb(150, 150, 150),
-                    ForeColor = Color.White,
-                    FlatStyle = FlatStyle.Flat
-                };
-                btnBack.FlatAppearance.BorderSize = 2;
-                btnBack.FlatAppearance.BorderColor = Color.FromArgb(100, 100, 100);
-                btnBack.Cursor = Cursors.Hand;
-                btnBack.Click += (s, e) => GoBackToMenu();
-
-                this.Controls.Add(lblTitle);
-                this.Controls.Add(tabControl);
-                this.Controls.Add(btnBack);
-            }
-
-            private void GoBackToMenu()
-            {
-                if (parentPanel != null && mainForm is Form1 form1)
-                {
-                    parentPanel.Controls.Clear();
-                    form1.GetType().GetMethod("ShowMainMenu",
-                        System.Reflection.BindingFlags.NonPublic |
-                        System.Reflection.BindingFlags.Instance)?.Invoke(form1, null);
-                }
-            }
-
-            private string GetStars(int count)
-            {
-                return new string('⭐', count);
-            }
-
-            private Button CreateLevelButton(int levelId, int difficulty)
-            {
-                bool isUnlocked = profile.UnlockedLevels.Contains(levelId);
-                bool isCompleted = profile.CompletedLevels.Contains(levelId);
-
-                Button btn = new Button
-                {
-                    Size = new Size(150, 150),
-                    Margin = new Padding(10),
-                    BackColor = isCompleted ? Color.FromArgb(144, 238, 144) :
-                               isUnlocked ? Color.FromArgb(255, 182, 193) :
-                               Color.FromArgb(200, 200, 200),
-                    ForeColor = isCompleted ? Color.White : Color.FromArgb(100, 100, 100),
-                    FlatStyle = FlatStyle.Flat,
-                    Enabled = isUnlocked,
-                    Font = new Font("Georgia", 11, FontStyle.Bold)
-                };
-
-                btn.FlatAppearance.BorderSize = 3;
-                btn.FlatAppearance.BorderColor = isCompleted ? Color.FromArgb(34, 139, 34) :
-                                              isUnlocked ? Color.FromArgb(255, 105, 180) :
-                                              Color.FromArgb(150, 150, 150);
-
-                if (isUnlocked)
-                {
-                    btn.Text = $"Уровень {levelId + 1}\n\n14×15\n{GetStars(difficulty)}";
-                    btn.Click += (s, e) => StartLevel(levelId, difficulty);
                 }
                 else
                 {
-                    btn.Text = "🔒\nЗакрыто";
+                    StartLevel(levelId);
                 }
+            };
 
-                btn.Cursor = isUnlocked ? Cursors.Hand : Cursors.Default;
-                return btn;
-            }
+            return btn;
+        }
 
-            private void StartLevel(int levelId, int difficulty)
+        private void StartLevel(int levelId)
+        {
+            if (parentPanel != null && mainForm != null)
             {
-                Puzzle puzzle = CreateTestPuzzle(levelId, difficulty);
-
-                GamePlayForm game = new GamePlayForm(puzzle, profile, profileIndex);
-                game.ShowDialog();
-
-                if (game.IsCompleted && !profile.CompletedLevels.Contains(levelId))
-                {
-                    profile.CompletedLevels.Add(levelId);
-                    if (levelId + 1 < 30)
-                        profile.UnlockedLevels.Add(levelId + 1);
-                    profile.Save(profileIndex);
-                }
+                parentPanel.Controls.Clear();
+                PlatformerLevel level = CreateLevelById(levelId);
+                level.Dock = DockStyle.Fill;
+                level.TopLevel = false;
+                level.FormBorderStyle = FormBorderStyle.None;
+                parentPanel.Controls.Add(level);
+                level.Show();
             }
-
-            private Puzzle CreateTestPuzzle(int id, int difficulty)
+            else
             {
-                Puzzle puzzle = new Puzzle
-                {
-                    ID = id,
-                    Width = 14,
-                    Height = 15,
-                    Difficulty = difficulty,
-                    Name = $"Уровень {id + 1}",
-                    Colors = new Color[]
-                    {
-                Color.White,
-                Color.FromArgb(70, 130, 180),
-                Color.FromArgb(220, 20, 60),
-                Color.FromArgb(60, 179, 113),
-                Color.FromArgb(255, 215, 0),
-                Color.FromArgb(148, 0, 211),
-                Color.FromArgb(255, 140, 0)
-                    }
-                };
-
-                for (int y = 0; y < puzzle.Height; y++)
-                {
-                    for (int x = 0; x < puzzle.Width; x++)
-                    {
-                        puzzle.Solution[y, x] = 0;
-                    }
-                }
-
-                puzzle.HintsHorizontal = GenerateHints(puzzle.Solution, puzzle.Height, puzzle.Width, true);
-                puzzle.HintsVertical = GenerateHints(puzzle.Solution, puzzle.Width, puzzle.Height, false);
-
-                return puzzle;
+                PlatformerLevel level = CreateLevelById(levelId);
+                level.ShowDialog();
             }
+        }
 
-            private int[,] GenerateHints(int[,] data, int rows, int cols, bool horizontal)
+        private PlatformerLevel CreateLevelById(int id)
+        {
+            switch (id)
             {
-                int[,] hints = new int[rows, 10];
+                case 0: return new Level1(profile, profileIndex, parentPanel, mainForm, id);
+                case 1: return new Level2(profile, profileIndex, parentPanel, mainForm, id);
+                // case 2: return new Level3(profile, profileIndex, parentPanel, mainForm, id);
+                // ...
+                default: return new Level1(profile, profileIndex, parentPanel, mainForm, id);
+            }
+        }
 
-                for (int i = 0; i < rows; i++)
-                {
-                    int hintIndex = 0;
-                    int count = 0;
-                    int lastColor = 0;
+        private void SwitchTab(int tabIndex)
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                tabPanels[i].Visible = false;
+                tabButtons[i].BackColor = Color.Black;
+            }
+            tabPanels[tabIndex].Visible = true;
+            tabButtons[tabIndex].BackColor = Color.FromArgb(60, 60, 60);
+            currentTabIndex = tabIndex;
+        }
 
-                    for (int j = 0; j < cols; j++)
-                    {
-                        int val = horizontal ? data[i, j] : data[j, i];
+        private void GoBackToMenu()
+        {
+            if (parentPanel != null && mainForm is Form1 form1)
+            {
+                parentPanel.Controls.Clear();
+                form1.GetType().GetMethod("ShowMainMenu",
+                    System.Reflection.BindingFlags.NonPublic |
+                    System.Reflection.BindingFlags.Instance)?.Invoke(form1, null);
+            }
+            else
+            {
+                this.Close();
+            }
+        }
 
-                        if (val != 0)
-                        {
-                            if (val == lastColor)
-                            {
-                                count++;
-                            }
-                            else
-                            {
-                                if (count > 0)
-                                {
-                                    hints[i, hintIndex++] = lastColor * 100 + count;
-                                }
-                                count = 1;
-                                lastColor = val;
-                            }
-                        }
-                        else
-                        {
-                            if (count > 0)
-                            {
-                                hints[i, hintIndex++] = lastColor * 100 + count;
-                                count = 0;
-                                lastColor = 0;
-                            }
-                        }
-                    }
-
-                    if (count > 0)
-                    {
-                        hints[i, hintIndex++] = lastColor * 100 + count;
-                    }
-                }
-
-                return hints;
+        private string GetStoryForLevel(int levelId)
+        {
+            switch (levelId)
+            {
+                case 0: return "Пока я рисовала дом, я по неосторожности пролила на него какао. Мама аккуратно очистила бумагу и просушила, но разводы от какао остались.";
+                case 1: return "История для уровня 2...";
+                case 2: return "История для уровня 3...";
+                case 3: return "История для уровня 4...";
+                default: return "Воспоминание пока скрыто.";
             }
         }
     }

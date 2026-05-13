@@ -5,15 +5,17 @@ using Memory.Data;
 
 namespace Memory
 {
-    public class Form1 : Form
+    public partial class Form1 : Form
     {
         private Profile currentProfile;
         private int currentProfileIndex = -1;
+        private Settings gameSettings;
         private Panel contentPanel;
 
         private Button btnPlay;
         private Button btnGallery;
         private Button btnSettings;
+        private Button btnHowToPlay;
         private Button btnExit;
         private Button btnProfile;
         private Label lblProfileName;
@@ -25,22 +27,32 @@ namespace Memory
 
         private void InitializeMainForm()
         {
-            this.Text = "Nonogram Garden";
+            this.Text = "Memory Garden";
             this.Size = new Size(1024, 768);
             this.StartPosition = FormStartPosition.CenterScreen;
-            this.BackColor = Color.FromArgb(255, 248, 220);
+            this.BackColor = Color.Black;
             this.FormBorderStyle = FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
 
-            // Панель для контента
+            
+            gameSettings = Settings.Load();
+
+            
+            if (gameSettings.LastProfileIndex >= 0 && Profile.Exists(gameSettings.LastProfileIndex))
+            {
+                currentProfileIndex = gameSettings.LastProfileIndex;
+                currentProfile = Profile.Load(currentProfileIndex);
+            }
+
+            
             contentPanel = new Panel
             {
                 Dock = DockStyle.Fill,
-                BackColor = Color.FromArgb(255, 248, 220)
+                BackColor = Color.Black
             };
             this.Controls.Add(contentPanel);
 
-            // Показываем главное меню
+            
             ShowMainMenu();
 
             this.FormClosing += Form1_FormClosing;
@@ -50,18 +62,24 @@ namespace Memory
         {
             contentPanel.Controls.Clear();
             InitializeUI();
+
+            if (currentProfile != null)
+            {
+                lblProfileName.Text = currentProfile.Name;
+                lblProfileName.ForeColor = Color.White;
+            }
         }
 
         private void InitializeUI()
         {
             int centerX = contentPanel.ClientSize.Width / 2;
 
-            // Заголовок
+            
             Label lblTitle = new Label
             {
-                Text = "🌸 Nonogram Garden 🌸",
+                Text = "🌸 Memory Garden 🌸",
                 Font = new Font("Georgia", 36, FontStyle.Bold),
-                ForeColor = Color.FromArgb(255, 105, 180),
+                ForeColor = Color.White,
                 AutoSize = false,
                 Size = new Size(contentPanel.ClientSize.Width, 100),
                 TextAlign = ContentAlignment.MiddleCenter,
@@ -69,12 +87,12 @@ namespace Memory
             };
             contentPanel.Controls.Add(lblTitle);
 
-            // Статус профиля
+            
             lblProfileName = new Label
             {
                 Text = currentProfile != null ? currentProfile.Name : "",
                 Font = new Font("Georgia", 16, FontStyle.Italic),
-                ForeColor = Color.FromArgb(160, 82, 45),
+                ForeColor = Color.White,
                 AutoSize = false,
                 Size = new Size(400, 30),
                 TextAlign = ContentAlignment.MiddleCenter,
@@ -82,7 +100,7 @@ namespace Memory
             };
             contentPanel.Controls.Add(lblProfileName);
 
-            // Кнопки меню
+            
             btnPlay = CreateButton("Играть", centerX, 300, 200, 50);
             btnPlay.Click += BtnPlay_Click;
             contentPanel.Controls.Add(btnPlay);
@@ -95,11 +113,15 @@ namespace Memory
             btnSettings.Click += (s, e) => ShowSettings();
             contentPanel.Controls.Add(btnSettings);
 
-            btnExit = CreateButton("Выход", centerX, 480, 200, 50);
+            btnHowToPlay = CreateButton("Обучение", centerX, 480, 200, 50);
+            btnHowToPlay.Click += (s, e) => ShowHowToPlay();
+            contentPanel.Controls.Add(btnHowToPlay);
+
+            btnExit = CreateButton("Выход", centerX, 540, 200, 50);
             btnExit.Click += BtnExit_Click;
             contentPanel.Controls.Add(btnExit);
 
-            // Кнопка профиль
+            
             btnProfile = CreateButton("👤 Профиль", 850, 50, 150, 40);
             btnProfile.Font = new Font("Georgia", 12);
             btnProfile.Click += BtnProfile_Click;
@@ -114,12 +136,12 @@ namespace Memory
                 Font = new Font("Georgia", 14, FontStyle.Bold),
                 Size = new Size(w, h),
                 Location = new Point(x - w / 2, y),
-                BackColor = Color.FromArgb(255, 182, 193),
+                BackColor = Color.Black,
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat
             };
             btn.FlatAppearance.BorderSize = 2;
-            btn.FlatAppearance.BorderColor = Color.FromArgb(255, 105, 180);
+            btn.FlatAppearance.BorderColor = Color.White;
             btn.Cursor = Cursors.Hand;
             return btn;
         }
@@ -134,7 +156,10 @@ namespace Memory
                 currentProfileIndex = profileForm.SelectedProfileIndex;
                 currentProfile = Profile.Load(currentProfileIndex);
                 lblProfileName.Text = currentProfile.Name;
-                lblProfileName.ForeColor = Color.FromArgb(160, 82, 45);
+                lblProfileName.ForeColor = Color.White;
+
+                gameSettings.LastProfileIndex = currentProfileIndex;
+                gameSettings.Save();
             }
         }
 
@@ -147,30 +172,15 @@ namespace Memory
                 return;
             }
 
-            if (!currentProfile.HasSeenTutorial1)
-            {
-                TutorialForm tutorial1 = new TutorialForm(1);
-                tutorial1.ShowDialog(this);
-                currentProfile.HasSeenTutorial1 = true;
-                currentProfile.Save(currentProfileIndex);
-            }
+           
 
-            if (!currentProfile.HasSeenTutorial2)
-            {
-                TutorialForm tutorial2 = new TutorialForm(2);
-                tutorial2.ShowDialog(this);
-                currentProfile.HasSeenTutorial2 = true;
-                currentProfile.Save(currentProfileIndex);
-            }
-
-            // Показываем выбор уровней в той же панели
             contentPanel.Controls.Clear();
-            LevelSelectForm levelForm = new LevelSelectForm(currentProfile, currentProfileIndex, contentPanel, this);
-            levelForm.Dock = DockStyle.Fill;
-            levelForm.TopLevel = false;
-            levelForm.FormBorderStyle = FormBorderStyle.None;
-            contentPanel.Controls.Add(levelForm);
-            levelForm.Show();
+            LevelSelectForm levelSelect = new LevelSelectForm(currentProfile, currentProfileIndex, contentPanel, this);
+            levelSelect.Dock = DockStyle.Fill;
+            levelSelect.TopLevel = false;
+            levelSelect.FormBorderStyle = FormBorderStyle.None;
+            contentPanel.Controls.Add(levelSelect);
+            levelSelect.Show();
         }
 
         private void ShowGallery()
@@ -202,6 +212,12 @@ namespace Memory
             settings.Show();
         }
 
+        private void ShowHowToPlay()
+        {
+            HowToPlayForm howTo = new HowToPlayForm();
+            howTo.ShowDialog(this);
+        }
+
         private void BtnExit_Click(object sender, EventArgs e)
         {
             string[] questions = new string[]
@@ -231,6 +247,12 @@ namespace Memory
         {
             if (e.CloseReason == CloseReason.ApplicationExitCall)
                 return;
+
+            if (currentProfileIndex >= 0)
+            {
+                gameSettings.LastProfileIndex = currentProfileIndex;
+                gameSettings.Save();
+            }
 
             string[] questions = new string[]
             {
