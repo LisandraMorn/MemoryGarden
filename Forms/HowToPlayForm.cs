@@ -97,5 +97,19 @@ W / ↑ — прыжок
                 TextAlign = ContentAlignment.TopLeft
             };
         }
+
+        private void InitializeComponent()
+        {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(HowToPlayForm));
+            this.SuspendLayout();
+            // 
+            // HowToPlayForm
+            // 
+            this.ClientSize = new System.Drawing.Size(282, 253);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Name = "HowToPlayForm";
+            this.ResumeLayout(false);
+
+        }
     }
 }

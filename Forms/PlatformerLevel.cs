@@ -477,6 +477,20 @@ namespace Memory
             Invalidate();
         }
 
+        private void InitializeComponent()
+        {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PlatformerLevel));
+            this.SuspendLayout();
+            // 
+            // PlatformerLevel
+            // 
+            this.ClientSize = new System.Drawing.Size(282, 253);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Name = "PlatformerLevel";
+            this.ResumeLayout(false);
+
+        }
+
         private void PauseBetweenLinesTimer_Tick(object sender, EventArgs e)
         {
             pauseBetweenLinesTimer.Stop();

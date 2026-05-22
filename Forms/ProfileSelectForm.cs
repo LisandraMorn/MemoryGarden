@@ -160,5 +160,19 @@ namespace Memory
             MessageBox.Show(parent, message, title, MessageBoxButtons.OK, icon);
             parent.Close();
         }
+
+        private void InitializeComponent()
+        {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ProfileSelectForm));
+            this.SuspendLayout();
+            // 
+            // ProfileSelectForm
+            // 
+            this.ClientSize = new System.Drawing.Size(282, 253);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Name = "ProfileSelectForm";
+            this.ResumeLayout(false);
+
+        }
     }
 }

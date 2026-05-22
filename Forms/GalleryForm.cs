@@ -188,5 +188,19 @@ namespace Memory
                     System.Reflection.BindingFlags.Instance)?.Invoke(form1, null);
             }
         }
+
+        private void InitializeComponent()
+        {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GalleryForm));
+            this.SuspendLayout();
+            // 
+            // GalleryForm
+            // 
+            this.ClientSize = new System.Drawing.Size(282, 253);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Name = "GalleryForm";
+            this.ResumeLayout(false);
+
+        }
     }
 }

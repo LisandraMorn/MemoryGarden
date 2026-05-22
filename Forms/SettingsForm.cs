@@ -122,5 +122,19 @@ namespace Memory
                 this.Close();
             }
         }
+
+        private void InitializeComponent()
+        {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SettingsForm));
+            this.SuspendLayout();
+            // 
+            // SettingsForm
+            // 
+            this.ClientSize = new System.Drawing.Size(282, 253);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Name = "SettingsForm";
+            this.ResumeLayout(false);
+
+        }
     }
 }
