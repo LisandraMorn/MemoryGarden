@@ -50,9 +50,7 @@ namespace Memory
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(StoryForm));
             this.SuspendLayout();
-            // 
-            // StoryForm
-            // 
+            
             this.ClientSize = new System.Drawing.Size(282, 253);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "StoryForm";

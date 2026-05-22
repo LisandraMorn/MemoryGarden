@@ -58,7 +58,7 @@ namespace Memory
         protected List<RectangleF> dialogueTriggers = new List<RectangleF>();
         protected List<string[]> dialogueTexts = new List<string[]>();
         protected List<bool> dialogueDone = new List<bool>();
-        protected List<int> dialogueMemoryIndex = new List<int>(); // ← ДОБАВЛЕНО: привязка триггера к воспоминанию
+        protected List<int> dialogueMemoryIndex = new List<int>();
 
         private Dialogue currentDialogue;
         private Timer dialogueTimer;
@@ -147,7 +147,7 @@ namespace Memory
             dialogueTriggers.Clear();
             dialogueTexts.Clear();
             dialogueDone.Clear();
-            dialogueMemoryIndex.Clear(); // ← ДОБАВЛЕНО: очистка
+            dialogueMemoryIndex.Clear();
             walkThroughSprites.Clear();
             walkThroughImages.Clear();
             invisiblePlatforms.Clear();
@@ -291,7 +291,7 @@ namespace Memory
                     StartMemoryPuzzle(i);
             }
 
-            // ← ИСПРАВЛЕНО: проверка по конкретному воспоминанию
+           
             for (int i = 0; i < dialogueTriggers.Count; i++)
             {
                 int memIndex = i < dialogueMemoryIndex.Count ? dialogueMemoryIndex[i] : i;
@@ -481,9 +481,7 @@ namespace Memory
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PlatformerLevel));
             this.SuspendLayout();
-            // 
-            // PlatformerLevel
-            // 
+            
             this.ClientSize = new System.Drawing.Size(282, 253);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "PlatformerLevel";
