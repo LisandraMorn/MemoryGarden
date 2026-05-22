@@ -10,9 +10,7 @@ namespace Memory
         private Panel parentPanel;
         private Form mainForm;
         private TrackBar tbMusic;
-        private TrackBar tbSound;
         private Label lblMusicValue;
-        private Label lblSoundValue;
 
         public SettingsForm(Panel panel, Form main)
         {
@@ -32,15 +30,13 @@ namespace Memory
         {
             Settings settings = Settings.Load();
             tbMusic.Value = settings.MusicVolume;
-            tbSound.Value = settings.SoundVolume;
             lblMusicValue.Text = $"{tbMusic.Value}%";
-            lblSoundValue.Text = $"{tbSound.Value}%";
         }
 
         private void InitializeUI()
         {
             this.Text = "Настройки";
-            this.Size = new Size(500, 450);
+            this.Size = new Size(570, 300);
             this.StartPosition = FormStartPosition.CenterParent;
             this.BackColor = Color.Black;
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -54,7 +50,6 @@ namespace Memory
                 Location = new Point(175, 30)
             };
 
-            
             Label lblMusic = new Label
             {
                 Text = "🎵 Музыка",
@@ -92,70 +87,12 @@ namespace Memory
                 AutoSize = true
             };
 
-            
-            Label lblSound = new Label
-            {
-                Text = "🔊 Звук",
-                Font = new Font("Georgia", 14),
-                ForeColor = Color.White,
-                Location = new Point(50, 190),
-                AutoSize = true
-            };
-
-            tbSound = new TrackBar
-            {
-                Minimum = 0,
-                Maximum = 100,
-                TickFrequency = 10,
-                Location = new Point(50, 220),
-                Size = new Size(300, 45),
-                BackColor = Color.Black,
-                ForeColor = Color.White
-            };
-            tbSound.Scroll += (s, e) =>
-            {
-                lblSoundValue.Text = $"{tbSound.Value}%";
-                Settings settings = Settings.Load();
-                settings.SoundVolume = tbSound.Value;
-                settings.Save();
-            };
-
-            lblSoundValue = new Label
-            {
-                Text = "100%",
-                Font = new Font("Georgia", 12),
-                ForeColor = Color.White,
-                Location = new Point(360, 225),
-                AutoSize = true
-            };
-
-            
-            Label lblCellSize = new Label
-            {
-                Text = "Размер клеток:",
-                Font = new Font("Georgia", 14),
-                ForeColor = Color.White,
-                Location = new Point(50, 290),
-                AutoSize = true
-            };
-
-            ComboBox cmbCellSize = new ComboBox
-            {
-                Location = new Point(220, 290),
-                Size = new Size(150, 30),
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                BackColor = Color.Black,
-                ForeColor = Color.White
-            };
-            cmbCellSize.Items.AddRange(new object[] { "20px", "25px", "30px", "35px", "40px" });
-            cmbCellSize.SelectedIndex = 2;
-
             Button btnSave = new Button
             {
                 Text = "Сохранить",
                 Font = new Font("Georgia", 14, FontStyle.Bold),
                 Size = new Size(150, 40),
-                Location = new Point(175, 350),
+                Location = new Point(175, 200),
                 BackColor = Color.Black,
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat
@@ -168,11 +105,6 @@ namespace Memory
             this.Controls.Add(lblMusic);
             this.Controls.Add(tbMusic);
             this.Controls.Add(lblMusicValue);
-            this.Controls.Add(lblSound);
-            this.Controls.Add(tbSound);
-            this.Controls.Add(lblSoundValue);
-            this.Controls.Add(lblCellSize);
-            this.Controls.Add(cmbCellSize);
             this.Controls.Add(btnSave);
         }
 

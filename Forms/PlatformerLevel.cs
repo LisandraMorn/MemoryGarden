@@ -37,7 +37,7 @@ namespace Memory
         protected List<RectangleF> decorations = new List<RectangleF>();
         protected List<Image> decorationImgs = new List<Image>();
 
-        
+
         protected List<RectangleF> walkThroughSprites = new List<RectangleF>();
         protected List<Image> walkThroughImages = new List<Image>();
 
@@ -45,7 +45,7 @@ namespace Memory
         protected bool[] memoryActive = new bool[3];
         protected Image[] memoryImgs = new Image[3];
 
-        
+
         protected List<RectangleF> aliceTriggers = new List<RectangleF>();
         protected List<bool> aliceVisible = new List<bool>();
         protected List<bool> aliceDialogueDone = new List<bool>();
@@ -58,13 +58,14 @@ namespace Memory
         protected List<RectangleF> dialogueTriggers = new List<RectangleF>();
         protected List<string[]> dialogueTexts = new List<string[]>();
         protected List<bool> dialogueDone = new List<bool>();
+        protected List<int> dialogueMemoryIndex = new List<int>(); // ← ДОБАВЛЕНО: привязка триггера к воспоминанию
 
         private Dialogue currentDialogue;
         private Timer dialogueTimer;
         private Timer pauseBetweenLinesTimer;
         private bool dialogueWillHideAlice;
         private RectangleF? dialoguePosition;
-        private int dialogueAliceIndex = -1; 
+        private int dialogueAliceIndex = -1;
 
         private int memoriesCollected = 0;
         private const int totalMemories = 3;
@@ -146,6 +147,7 @@ namespace Memory
             dialogueTriggers.Clear();
             dialogueTexts.Clear();
             dialogueDone.Clear();
+            dialogueMemoryIndex.Clear(); // ← ДОБАВЛЕНО: очистка
             walkThroughSprites.Clear();
             walkThroughImages.Clear();
             invisiblePlatforms.Clear();
@@ -271,7 +273,7 @@ namespace Memory
             catBounds.X = Math.Max(0, Math.Min(catBounds.X, worldWidth - catBounds.Width));
             catBounds.Y = Math.Max(0, Math.Min(catBounds.Y, ClientSize.Height - catBounds.Height));
 
-            
+
             for (int i = 0; i < aliceTriggers.Count; i++)
             {
                 if (aliceVisible[i] && !aliceDialogueDone[i] && aliceDialogues[i] != null &&
@@ -289,12 +291,16 @@ namespace Memory
                     StartMemoryPuzzle(i);
             }
 
+            // ← ИСПРАВЛЕНО: проверка по конкретному воспоминанию
             for (int i = 0; i < dialogueTriggers.Count; i++)
-                if (!dialogueDone[i] && catBounds.IntersectsWith(dialogueTriggers[i]) && i < memoriesCollected)
+            {
+                int memIndex = i < dialogueMemoryIndex.Count ? dialogueMemoryIndex[i] : i;
+                if (!dialogueDone[i] && catBounds.IntersectsWith(dialogueTriggers[i]) && !memoryActive[memIndex])
                 {
                     dialogueDone[i] = true;
                     StartDialogue(dialogueTexts[i], false, dialogueTriggers[i]);
                 }
+            }
 
             if (!levelCompleted && memoriesCollected >= totalMemories && catBounds.IntersectsWith(doorTrigger))
             {
@@ -303,7 +309,7 @@ namespace Memory
                 {
                     profile.CompletedLevels.Add(levelId);
 
-                   
+
                     int nextLevelId = levelId + 1;
                     if (!profile.UnlockedLevels.Contains(nextLevelId) && nextLevelId < 9)
                     {
@@ -602,15 +608,15 @@ namespace Memory
 
             g.TranslateTransform(-camX, -camY);
 
-            
+
             for (int i = 0; i < decorations.Count; i++)
                 DrawScaledImage(g, decorationImgs[i], decorations[i]);
 
-            
+
             if (platforms.Count > 0)
                 DrawScaledImage(g, floorImg, platforms[0]);
 
-            
+
             for (int i = 1; i < platforms.Count; i++)
             {
                 var plat = platforms[i];
@@ -622,27 +628,27 @@ namespace Memory
                     DrawScaledImage(g, blockImg, plat);
             }
 
-             
+
             for (int i = 0; i < walkThroughSprites.Count; i++)
                 DrawScaledImage(g, walkThroughImages[i], walkThroughSprites[i]);
 
-            
+
             if (doorImg != null)
                 DrawScaledImage(g, doorImg, doorTrigger);
 
-            
+
             for (int i = 0; i < aliceTriggers.Count; i++)
             {
                 if (aliceVisible[i] && aliceImg != null && aliceTriggers[i].Width > 0)
                     DrawScaledImage(g, aliceImg, aliceTriggers[i]);
             }
 
-            
+
             for (int i = 0; i < memoryItems.Length; i++)
                 if (memoryActive[i] && memoryImgs[i] != null)
                     DrawScaledImage(g, memoryImgs[i], memoryItems[i]);
 
-            
+
             Image catImg = (Math.Abs(catVelocity.X) > 0.5f) ?
                            ((currentRunFrame == 0) ? catRun1Img : catRun2Img) :
                            catStandImg;
@@ -663,7 +669,7 @@ namespace Memory
             else
                 g.FillRectangle(Brushes.White, catBounds);
 
-            
+
             if (currentDialogue != null)
             {
                 string text = currentDialogue.GetCurrentText();

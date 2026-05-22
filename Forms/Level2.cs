@@ -43,7 +43,7 @@ namespace Memory
             aliceVisible.Add(true);
             aliceDialogueDone.Add(false);
             aliceDialogues.Add(new string[] {
-                "...",
+                "*Этот уровень в разработке*",
                 "..."
             });
 
